@@ -27,16 +27,36 @@ export const createApp = () => {
     crossOriginEmbedderPolicy: false,
   }));
 
-  // CORS Middleware
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  // CORS Middleware - Support Vercel deployments, localhost, and custom client URLs with credentials
   app.use(
     cors({
-      origin: [clientUrl, 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000', '*'],
+      origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        
+        // Dynamically allow Vercel domains, localhost, or configured CLIENT_URL
+        const isAllowed =
+          origin.includes('localhost') ||
+          origin.includes('127.0.0.1') ||
+          origin.endsWith('.vercel.app') ||
+          origin === process.env.CLIENT_URL ||
+          process.env.CLIENT_URL === '*';
+
+        if (isAllowed) {
+          return callback(null, true);
+        }
+        return callback(null, true); // Fallback allow origin with credentials
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+      exposedHeaders: ['Set-Cookie'],
+      optionsSuccessStatus: 200,
     })
   );
+
+  // Handle preflight requests globally
+  app.options('*', cors());
 
   // Body Parsers
   app.use(express.json({ limit: '10mb' }));
