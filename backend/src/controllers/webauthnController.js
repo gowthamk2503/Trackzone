@@ -8,8 +8,23 @@ import { User } from '../models/User.js';
 import { logAudit } from '../utils/audit.js';
 
 const getRPName = () => process.env.WEBAUTHN_RP_NAME || 'TrackZone';
-const getRPID = () => process.env.WEBAUTHN_RP_ID || 'localhost';
-const getOrigin = () => process.env.WEBAUTHN_ORIGIN || 'http://localhost:5173';
+
+const getRPID = (req) => {
+  if (req?.headers?.origin) {
+    try {
+      const url = new URL(req.headers.origin);
+      return url.hostname;
+    } catch {}
+  }
+  return process.env.WEBAUTHN_RP_ID || 'localhost';
+};
+
+const getOrigin = (req) => {
+  if (req?.headers?.origin) {
+    return req.headers.origin;
+  }
+  return process.env.WEBAUTHN_ORIGIN || 'http://localhost:5173';
+};
 
 /**
  * 1. Generate Registration Options (Server -> Client)
@@ -23,7 +38,7 @@ export const getRegistrationOptions = async (req, res) => {
     }
 
     const rpName = getRPName();
-    const rpID = getRPID();
+    const rpID = getRPID(req);
 
     // Map existing credentials to prevent duplicate hardware key registration
     const excludeCredentials = (user.webauthnCredentials || []).map((cred) => ({
@@ -79,8 +94,8 @@ export const verifyRegistration = async (req, res) => {
       return;
     }
 
-    const rpID = getRPID();
-    const origin = getOrigin();
+    const rpID = getRPID(req);
+    const origin = getOrigin(req);
 
     const verification = await verifyRegistrationResponse({
       response: req.body,
@@ -148,7 +163,7 @@ export const getAuthenticationOptions = async (req, res) => {
       return;
     }
 
-    const rpID = getRPID();
+    const rpID = getRPID(req);
 
     const allowCredentials = (user.webauthnCredentials || []).map((cred) => ({
       id: cred.credentialID,
@@ -186,7 +201,7 @@ export const getAuthenticationOptions = async (req, res) => {
 /**
  * 4. Helper to verify a WebAuthn Authentication assertion
  */
-export const verifyWebAuthnAssertion = async (user, assertionResponse) => {
+export const verifyWebAuthnAssertion = async (user, assertionResponse, req) => {
   try {
     if (!assertionResponse || !assertionResponse.id) {
       return { verified: false, error: 'Missing WebAuthn assertion payload' };
@@ -209,8 +224,8 @@ export const verifyWebAuthnAssertion = async (user, assertionResponse) => {
       };
     }
 
-    const rpID = getRPID();
-    const origin = getOrigin();
+    const rpID = getRPID(req);
+    const origin = getOrigin(req);
 
     const verification = await verifyAuthenticationResponse({
       response: assertionResponse,

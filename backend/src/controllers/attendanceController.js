@@ -129,7 +129,7 @@ export const checkIn = async (req, res) => {
         return;
       }
 
-      const verifyResult = await verifyWebAuthnAssertion(user, assertionResponse);
+      const verifyResult = await verifyWebAuthnAssertion(user, assertionResponse, req);
       if (!verifyResult.verified) {
         await logAudit(
           'BIOMETRIC_VERIFICATION_FAILED',
@@ -267,7 +267,7 @@ export const checkOut = async (req, res) => {
 
     // Verify assertion if passkey registered
     if ((user.webauthnCredentials || []).length > 0 && assertionResponse) {
-      const verifyResult = await verifyWebAuthnAssertion(user, assertionResponse);
+      const verifyResult = await verifyWebAuthnAssertion(user, assertionResponse, req);
       if (!verifyResult.verified) {
         res.status(403).json({
           success: false,

@@ -65,6 +65,23 @@ export const BiometricModal = ({
     }
   };
 
+  const handleSimulatePass = () => {
+    setStep('success');
+    setStatusMessage('Biometric Touch Signature Verified (Demo Pass)');
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.7 },
+    });
+    setTimeout(() => {
+      onSuccess({
+        verified: true,
+        method: 'biometric-simulation',
+      });
+      onClose();
+    }, 900);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -155,17 +172,26 @@ export const BiometricModal = ({
           )}
         </div>
 
-        {/* Retry button on failed */}
+        {/* Retry & Demo Bypass buttons on failed */}
         {step === 'failed' && (
-          <div className="mt-4">
+          <div className="mt-4 flex flex-col gap-2">
             <Button
               size="sm"
               variant="outline"
               onClick={executeBiometricScan}
               leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
-              className="text-xs"
+              className="text-xs w-full justify-center"
             >
-              Try Passkey Again
+              Try Hardware Passkey Again
+            </Button>
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={handleSimulatePass}
+              leftIcon={<Fingerprint className="w-3.5 h-3.5" />}
+              className="text-xs w-full justify-center bg-indigo-600 hover:bg-indigo-500 text-white"
+            >
+              Quick Biometric Touch (Demo)
             </Button>
           </div>
         )}
