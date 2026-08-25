@@ -89,6 +89,14 @@ export const authenticateWithPasskey = async () => {
     }
 
     if (!optionsRes.data.success || !optionsRes.data.options) {
+      if (optionsRes.data.code === 'NO_PASSKEY_REGISTERED') {
+        return {
+          success: false,
+          method: 'webauthn',
+          code: 'NO_PASSKEY_REGISTERED',
+          error: optionsRes.data.message || 'No TrackZone passkey is registered. Please register your passkey in Profile first.',
+        };
+      }
       throw new Error(optionsRes.data.message || 'Failed to obtain authentication options');
     }
 

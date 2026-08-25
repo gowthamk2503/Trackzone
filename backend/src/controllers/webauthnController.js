@@ -171,10 +171,10 @@ export const getAuthenticationOptions = async (req, res) => {
     }));
 
     if (allowCredentials.length === 0) {
-      res.status(400).json({
+      res.status(200).json({
         success: false,
         code: 'NO_PASSKEY_REGISTERED',
-        message: 'No TrackZone passkey is registered. Please register your passkey in Profile first.',
+        message: 'No hardware passkey is registered on this profile yet. You can register one in Profile or use Quick Biometric Touch.',
       });
       return;
     }
