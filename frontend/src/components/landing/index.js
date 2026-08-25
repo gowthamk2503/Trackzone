@@ -1,0 +1,9 @@
+export { LandingNavbar } from './LandingNavbar';
+export { LandingHero } from './LandingHero';
+export { LandingMockup } from './LandingMockup';
+export { LandingProblems } from './LandingProblems';
+export { LandingHowItWorks } from './LandingHowItWorks';
+export { LandingFeatures } from './LandingFeatures';
+export { LandingSecurity } from './LandingSecurity';
+export { LandingCTA } from './LandingCTA';
+export { LandingFooter } from './LandingFooter';
