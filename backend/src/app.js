@@ -18,6 +18,9 @@ import webauthnRoutes from './routes/webauthnRoutes.js';
 export const createApp = () => {
   const app = express();
 
+  // Trust reverse proxy (Render, Vercel, Cloudflare, AWS)
+  app.set('trust proxy', 1);
+
   // Security Middleware
   app.use(helmet({
     contentSecurityPolicy: false,
